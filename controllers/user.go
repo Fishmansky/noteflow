@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/Fishmansky/noteflow/inits"
+	"github.com/Fishmansky/noteflow/middleware"
 	"github.com/Fishmansky/noteflow/models"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -40,6 +41,34 @@ func Login(c *gin.Context) {
 	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password)) != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "Wrong password",
+		})
+		return
+	}
+	accessToken, err := middleware.CreateAccessToken(user.ID)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error": "Failed to create access token",
+		})
+		return
+	}
+	refreshToken, err := middleware.CreateRefreshToken(user.ID)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error": "Failed to create refresh token",
+		})
+		return
+	}
+	saveAccessErr := middleware.SaveToken(user.ID, accessToken)
+	if saveAccessErr != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error": "Failed to save access token",
+		})
+		return
+	}
+	saveRefreshErr := middleware.SaveToken(user.ID, refreshToken)
+	if saveRefreshErr != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error": "Failed to save refresh token",
 		})
 		return
 	}
