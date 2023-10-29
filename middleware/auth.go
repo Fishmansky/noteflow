@@ -33,7 +33,7 @@ func CreateAccessToken(userID uint) (*TokenDetails, error) {
 		"exp":         accessToken.Exp,
 	})
 	var err error
-	accessToken.Token, err = token.SignedString(os.Getenv("SECRET"))
+	accessToken.Token, err = token.SignedString([]byte(os.Getenv("SECRET")))
 	return accessToken, err
 }
 
@@ -49,7 +49,7 @@ func CreateRefreshToken(userID uint) (*TokenDetails, error) {
 		"exp":          refreshToken.Exp,
 	})
 	var err error
-	refreshToken.Token, err = token.SignedString(os.Getenv("SECRET"))
+	refreshToken.Token, err = token.SignedString([]byte(os.Getenv("SECRET")))
 	return refreshToken, err
 }
 
@@ -57,7 +57,7 @@ func SaveToken(userID uint, t *TokenDetails) error {
 	Expires := time.Unix(t.Exp, 0)
 	now := time.Now()
 
-	err := inits.RedisDB.Set(t.Uuid, strconv.Itoa(int(userID)), Expires.Sub(now)).Err()
+	err := inits.Redis.Set(t.Uuid, strconv.Itoa(int(userID)), Expires.Sub(now)).Err()
 	if err != nil {
 		return err
 	}
