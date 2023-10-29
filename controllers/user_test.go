@@ -3,6 +3,7 @@ package controllers
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -10,9 +11,11 @@ import (
 	"testing"
 
 	"github.com/Fishmansky/noteflow/inits"
+	"github.com/Fishmansky/noteflow/models"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/suite"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -32,19 +35,19 @@ func (s *LoginSuite) SetupSuite() {
 	inits.ConnectToDB()
 	inits.SyncDB()
 	inits.ConnecRedis()
-	//s.DB = inits.DB
-	// bytes, err := bcrypt.GenerateFromPassword([]byte("Test1234"), 14)
-	// if err != nil {
-	// 	s.FailNow("Cloudn't hash password for test user")
-	// }
-	//s.DB.Create(&models.User{Email: "existing@user.pl", Password: string(bytes)})
-	//fmt.Println("Test user created!")
+	s.DB = inits.DB
+	bytes, err := bcrypt.GenerateFromPassword([]byte("Test1234"), 14)
+	if err != nil {
+		s.FailNow("Cloudn't hash password for test user")
+	}
+	s.DB.Create(&models.User{Email: "existing@user.pl", Password: string(bytes)})
+	fmt.Println("Test user created!")
 }
 
-// func (s *LoginSuite) TearDownSuite() {
-// 	s.DB.Where("email LIKE ?", "existing@user.pl").Delete(&models.User{})
-// 	fmt.Println("Test user deleted!")
-// }
+func (s *LoginSuite) TearDownSuite() {
+	s.DB.Where("email LIKE ?", "existing@user.pl").Delete(&models.User{})
+	fmt.Println("Test user deleted!")
+}
 
 func GetTestGinContext(w *httptest.ResponseRecorder) *gin.Context {
 	gin.SetMode(gin.TestMode)
@@ -72,7 +75,7 @@ type loginTestData struct {
 }
 
 var loginTestDataTable = []loginTestData{
-	{"test@test.pl", "Test1234"},
+	{"existing@user.pl", "Test1234"},
 	{"nonexisting@user.pl", "Test1234"},
 	{"", ""},
 }
