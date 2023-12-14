@@ -34,7 +34,7 @@ func (s *LoginSuite) SetupSuite() {
 	}
 	inits.ConnectToDB()
 	inits.SyncDB()
-	inits.ConnecRedis()
+	inits.ConnectRedis()
 	s.DB = inits.DB
 	bytes, err := bcrypt.GenerateFromPassword([]byte("Test1234"), 14)
 	if err != nil {

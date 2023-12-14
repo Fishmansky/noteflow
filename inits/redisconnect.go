@@ -8,11 +8,11 @@ import (
 
 var Redis *redis.Client
 
-func ConnecRedis() {
+func ConnectRedis() {
 	var err error
 	Redis = redis.NewClient(&redis.Options{
-		Addr:     os.Getenv("REDIS_ADDR"),
-		Password: os.Getenv("REDIS_DB"),
+		Addr:     os.Getenv("REDIS_DB_HOST"),
+		Password: os.Getenv("REDIS_DB_PASSWORD"),
 		DB:       0,
 	})
 	_, err = Redis.Ping().Result()

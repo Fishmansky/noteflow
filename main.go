@@ -10,7 +10,7 @@ func init() {
 	inits.LoadEnv()
 	inits.ConnectToDB()
 	inits.SyncDB()
-	inits.ConnecRedis()
+	inits.ConnectRedis()
 }
 
 func main() {
