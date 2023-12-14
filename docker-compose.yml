@@ -1,0 +1,48 @@
+version: "3.8"
+services:
+  api:
+    container_name: go-app-api
+    build: ./
+    ports:
+      - 80:80
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_completed_successfully
+    networks:
+      - fullstack
+
+  db:
+    image: mariadb:latest 
+    container_name: go-app-mariadb
+    ports:
+      - 3306:3306
+    environment:
+      MARIADB_ROOT_PASSWORD: root_password
+      MARIADB_DATABASE: app_database
+      MARIADB_USER: app_user
+      MARIADB_PASSWORD: app_password
+    volumes:
+      - /Users/pablo/Documents/projects/portfolio/data/db
+    networks:
+      - fullstack
+    healthcheck:
+        test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+        start_period: 1m
+        start_interval: 10s
+        interval: 1m
+        timeout: 5s
+        retries: 3
+
+  redis:
+    image: redis:latest
+    container_name: go-app-redis
+    ports:
+      - 6379:6379
+    networks:
+      - fullstack 
+
+networks:
+  fullstack:
+    driver: bridge
